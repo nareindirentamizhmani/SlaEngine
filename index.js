@@ -29,12 +29,12 @@ class sla_engine{
 
         this.eng.on('worker created', (name) => {
             console.log('worker created', name);
-            console.log(this.eng.workers[name]);
+            // console.log(this.eng.workers[name]);
           });
           
         this.eng.on('worker deleted', (name) => {
            console.log('worker deleted', name);
-           console.log(typeof this.eng.workers[name] === 'undefined');
+        //    console.log(typeof this.eng.workers[name] === 'undefined');
         });
     }
 
@@ -56,7 +56,7 @@ class sla_engine{
     //Stop only a specific job
     stopThisJob(jobName)
     {
-        if(isSANB(jobName))
+        if(isSANB(jobName) && isValidPath(templatePath))
             this.eng.stop(jobName);
         else
             throw new Error("Job name cannot be empty");
@@ -72,11 +72,11 @@ class sla_engine{
     }
 
     //Add new job
-    addNewJob = (jobName, triggerTime, jobTemplate, jobData) =>
+    addNewJob(jobName, triggerTime, jobTemplate, jobData)
     {
         var templatePath = path.join(__dirname,'jobs',jobTemplate+'.js');
 
-        if(isSANB(jobName) && isValidPath(templatePath))
+        if(isSANB(jobName) && isValidPath(templatePath) && dayjs(triggerTime).isValid())
         {
             const addedJobs = this.eng.add(
                 {
@@ -89,7 +89,7 @@ class sla_engine{
                 });
         }
         else
-            throw new Error("Invalid job template");
+            throw new Error("Invalid input parameters. Please check.");
     }
 }
 

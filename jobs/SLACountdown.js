@@ -2,7 +2,11 @@ const {parentPort, workerData, isMainThread} = require('worker_threads');
 const dayjs = require('dayjs');
 
 try{
+    /*Add any custom logic HERE*/
+
+    /*Test Method Call*/
     printMessage();
+
 }
 catch(error){
     console.error(error);
@@ -15,6 +19,7 @@ finally{
     }
 }   
 
+/*Test Method*/
 function printMessage()
 {
     if(parentPort)
