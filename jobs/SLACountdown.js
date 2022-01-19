@@ -19,11 +19,12 @@ finally{
     }
 }   
 
+
 /*Test Method*/
 function printMessage()
 {
     if(parentPort)
     {
-        parentPort.postMessage(workerData.value + " at "+ dayjs().toDate());
+        parentPort.postMessage(workerData.JobMessage + " at "+ dayjs().toDate());
     }
 }

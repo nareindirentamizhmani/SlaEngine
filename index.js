@@ -7,11 +7,11 @@ const isValidPath = require('is-valid-path');
 const Graceful = require('@ladjs/graceful');
 const dayjs = require('dayjs');
 const path = require('path');
+const cron = require('cron-validate');
 
 class sla_engine{
 
     constructor(){
-        console.log("Initialized Class");
         //Intialize Job Handler Instance
         this.eng = new JobScheduler({
             root:false,
@@ -20,7 +20,8 @@ class sla_engine{
                 console.log(message);
             }
         });
-        this.addNewJob = this.addNewJob.bind(this);
+        this.addNewOneTimeJob = this.addNewOneTimeJob.bind(this);
+        this.addNewCronJob = this.addNewCronJob.bind(this);
         const grHandler = new Graceful({brees:[this.eng]});
         grHandler.listen();
 
@@ -71,26 +72,50 @@ class sla_engine{
             throw new Error("Job name cannot be empty");
     }
 
-    //Add new job
-    addNewJob(jobName, triggerTime, jobTemplate, jobData)
+    //Add new job for one-time execution
+    addNewOneTimeJob(jobData)
     {
-        var templatePath = path.join(__dirname,'jobs',jobTemplate+'.js');
+        var templatePath = path.join(__dirname,'jobs',jobData.JobTemplate+'.js');
 
-        if(isSANB(jobName) && isValidPath(templatePath) && dayjs(triggerTime).isValid())
+        if(isSANB(jobData.Name) && isValidPath(templatePath) && dayjs(jobData.TriggerTime).isValid())
         {
             const addedJobs = this.eng.add(
                 {
-                    name:jobName,
+                    name:jobData.Name,
                     path: templatePath,
-                    date:triggerTime,
+                    date:jobData.TriggerTime,
                     worker:{
-                        workerData: jobData
+                        workerData: jobData.Data
                     }
                 });
         }
         else
             throw new Error("Invalid input parameters. Please check.");
     }
+
+    //Add new job for one-time execution
+    addNewCronJob(jobData)
+    {
+        var templatePath = path.join(__dirname,'jobs',jobData.JobTemplate+'.js');
+        var cronResult = cron(jobData.CronSyntax).isValid();
+
+        
+        if(isSANB(jobData.Name) && isValidPath(templatePath) && cronResult)
+        {
+            const addedJobs = this.eng.add(
+                {
+                    name:jobData.Name,
+                    path: templatePath,
+                    cron: jobData.CronSyntax,
+                    worker:{
+                        workerData: jobData.Data
+                    }
+                });
+        }
+        else
+            throw new Error("Invalid input parameters. Please check.");
+    }
+
 }
 
 module.exports = sla_engine;
